@@ -21,9 +21,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 # mysql config
 MYSQL_USER = os.environ.get('MYSQL_USER')
-MYSQL_PASS = os.environ.get('MYSQL_PASS')
+MYSQL_PASS = os.environ.get('MYSQL_PASSWORD')
 MYSQL_HOST = os.environ.get('MYSQL_HOST')
-MYSQL_DB = os.environ.get('MYSQL_DB')
+MYSQL_DB = os.environ.get('MYSQL_DATABASE')
 
 # database connection url
 db_url = f'mysql://{MYSQL_USER}:{MYSQL_PASS}@{MYSQL_HOST}/{MYSQL_DB}'
@@ -51,4 +51,4 @@ def create_db_schema():
 app.cli.add_command(create_db_schema)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=bool(int(os.environ.get('FLASK_DEBUG', '1'))))
