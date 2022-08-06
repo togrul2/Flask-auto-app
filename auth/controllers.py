@@ -5,18 +5,10 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     jwt_required,
-    get_jwt_identity,
-    JWTManager,
+    get_jwt_identity
 )
 from auth.services import UserService
 from models import db
-
-jwt = JWTManager()
-
-
-@jwt.expired_token_loader
-def my_expired_token_callback(jwt_header, jwt_payload):
-    return {"error": "Invalid access or refresh token"}, 401
 
 
 class LoginController(Resource):
@@ -82,12 +74,8 @@ class UserController(Resource):
         """Partial edit of user."""
         username = get_jwt_identity()
         user = UserService.get_by_username(username)
-
-        for k, v in self.parser.parse_args().items():
-            if v:
-                setattr(user, k, v)
-
-        db.session.commit()
+        data = self.parser.parse_args()
+        user.update(**data)
         return user.serialize, 200
 
     @jwt_required()
