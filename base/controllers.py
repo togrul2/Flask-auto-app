@@ -1,37 +1,41 @@
 from abc import ABC
 from typing import Any
-from flask import request
 from flask_jwt_extended import jwt_required
 from flask_restful import Resource
 from flask_restful.reqparse import RequestParser
 
 
 class BaseListCreateController(ABC, Resource):
-    """Base class for create and update operations."""
-    parser: RequestParser
+    """Base class for create and list operations."""
+    body_parser: RequestParser
+    args_parser: RequestParser
     service: Any
 
     def get(self):
+        # Here we fetch all records from db.
         result = self.service.all()
-        sort_by = request.args.get("sort", type=str)
-        desc = False
+        data = self.args_parser.parse_args()
+        sort_desc = False  # Sort ascending by default
 
-        if sort_by is not None:
-            if sort_by.startswith('-'):
+        # If sort keyword presents in request args, then sort.
+        if sort_by := data.get("sort"):
+            if sort_by.startswith('-'):  # `-` at the beginning indicates desc.
                 sort_by = sort_by[1:]
-                desc = True
+                sort_desc = True
 
-            if (attr := getattr(self.service.model, sort_by, None)) is not None:
-                if desc:
+            if attr := getattr(self.service.model, sort_by, None):
+                if sort_desc:
                     result = result.order_by(attr.desc())
                 else:
                     result = result.order_by(attr)
+            else:
+                return {'error': 'wrong sorting attribute given.'}, 400
 
         return [obj.serialize for obj in result], 200
 
     @jwt_required()
     def post(self):
-        data = self.parser.parse_args()
+        data = self.body_parser.parse_args()
         obj = self.service.create(**data)
         return obj.serialize, 201
 

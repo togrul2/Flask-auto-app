@@ -67,46 +67,13 @@ class User(db.Model, BaseModel):
         return f'<User {self.firstname}>'
 
 
-class Manufacturer(BaseModel, db.Model):
-    """Manufacturer model."""
-    __tablename__ = 'manufacturer'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'name': self.name
-        }
-
-    def __repr__(self):
-        return f'<Manufacturer {self.name}>'
-
-
-class Category(BaseModel, db.Model):
-    """Category model."""
-    __tablename__ = 'category'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-
-    @property
-    def serialize(self):
-        return {
-            'id': self.id,
-            'name': self.name
-        }
-
-
 class Car(BaseModel, db.Model):
     """Car model."""
     __tablename__ = 'car'
 
     id = db.Column(db.Integer, primary_key=True)
-    manufacturer_id = db.Column(db.Integer, db.ForeignKey('manufacturer.id'))
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    brand = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(50), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     model = db.Column(db.String(100), nullable=False)
     image = db.Column(db.String(300))
@@ -117,17 +84,13 @@ class Car(BaseModel, db.Model):
                            server_default=func.now())
 
     owner = db.relationship('User', backref=db.backref('cars', lazy=True))
-    category = db.relationship('Category',
-                               backref=db.backref('cars', lazy=True))
-    manufacturer = db.relationship('Manufacturer',
-                                   backref=db.backref('cars', lazy=True))
 
     @property
     def serialize(self):
         return {
             'id': self.id,
-            'manufacturer_id': self.manufacturer_id,
-            'category_id': self.category_id,
+            'brand': self.brand,
+            'category': self.category,
             'user_id': self.user_id,
             'model': self.model,
             'image': self.image,

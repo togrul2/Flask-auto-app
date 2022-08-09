@@ -8,6 +8,6 @@ from auth.controllers import (
 
 api = Api()
 
-api.add_resource(LoginController, '/login')
-api.add_resource(RegisterController, '/register')
-api.add_resource(UserController, '/user')
+api.add_resource(LoginController, '/api/login')
+api.add_resource(RegisterController, '/api/register')
+api.add_resource(UserController, '/api/user')

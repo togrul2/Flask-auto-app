@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import click
 from flask.cli import with_appcontext
 from flask import Flask
@@ -17,7 +18,7 @@ app = Flask(__name__)
 load_dotenv()
 
 # base directory
-basedir = os.path.abspath(os.path.dirname(__file__))
+BASE_DIR = Path(__file__).parent
 
 # mysql config
 MYSQL_USER = os.environ.get('MYSQL_USER')
@@ -33,6 +34,20 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['JWT_SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['PROPAGATE_EXCEPTIONS'] = True
+app.config['STATIC_FILES'] = BASE_DIR / 'static'
+app.config['UPLOAD_FOLDER'] = BASE_DIR / 'static/media'
+
+
+# CORS config
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers',
+                         'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods',
+                         'GET,PUT,POST,DELETE')
+    return response
+
 
 db.init_app(app)
 jwt.init_app(app)

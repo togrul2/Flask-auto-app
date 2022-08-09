@@ -80,6 +80,7 @@ class UserController(Resource):
 
     @jwt_required()
     def delete(self):
+        """Deletion of user."""
         username = get_jwt_identity()
         admin = UserService.get_by_username(username)
         admin.delete()
