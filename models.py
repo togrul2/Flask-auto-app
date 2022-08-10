@@ -1,4 +1,3 @@
-from typing import Any, Dict
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 from sqlalchemy import func
@@ -14,7 +13,7 @@ class BaseModel:
         db.session.commit()
         return self
 
-    def update(self, **params: Dict[str, Any]):
+    def update(self, **params):
         """Update method."""
         for k, v in params.items():
             if v:
@@ -57,10 +56,12 @@ class User(db.Model, BaseModel):
             'created_at': str(self.created_at)
         }
 
-    def update(self, params: Dict[str, Any]):
+    def update(self, **params):
         """User update method."""
-        password = generate_password_hash(params["password"])
-        params["password"] = password
+        print(params)
+        if params.get("password") is not None:
+            password = generate_password_hash(params["password"])
+            params["password"] = password
         return super().update(**params)
 
     def __repr__(self):

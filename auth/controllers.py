@@ -1,4 +1,6 @@
 """Controllers module"""
+import datetime
+
 from flask_restful import Resource, reqparse
 from werkzeug.security import check_password_hash
 from flask_jwt_extended import (
@@ -24,7 +26,10 @@ class LoginController(Resource):
         if user := UserService.get_by_username(data["username"]):
             if check_password_hash(user.password, data["password"]):
                 # Found username password is correct, generate tokens
-                access_token = create_access_token(identity=data['username'])
+                access_token = create_access_token(
+                    identity=data['username'],
+                    expires_delta=datetime.timedelta(
+                        days=365))  # Expiry is 365 for test purposes
                 refresh_token = create_refresh_token(identity=data['username'])
                 return {"access": access_token,
                         "refresh": refresh_token}, 201

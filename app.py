@@ -18,7 +18,7 @@ app = Flask(__name__)
 load_dotenv()
 
 # base directory
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).resolve().parent
 
 # mysql config
 MYSQL_USER = os.environ.get('MYSQL_USER')
@@ -45,7 +45,7 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers',
                          'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods',
-                         'GET,PUT,POST,DELETE')
+                         'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE')
     return response
 
 

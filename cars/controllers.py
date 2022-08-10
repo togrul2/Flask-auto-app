@@ -1,5 +1,5 @@
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from flask_restful import reqparse
+from flask_restful import reqparse, Resource
 
 from auth.services import UserService
 from base.controllers import (
@@ -7,6 +7,7 @@ from base.controllers import (
     BaseRetrieveUpdateDestroyController
 )
 from cars.services import CarService
+from models import Car
 
 
 class CarsController(BaseListCreateController):
@@ -39,8 +40,8 @@ class CarsController(BaseListCreateController):
 class CarController(BaseRetrieveUpdateDestroyController):
     """Car controller, provides retrieve, update and delete methods."""
     parser = reqparse.RequestParser()
-    parser.add_argument('brand', type=int, required=True)
-    parser.add_argument('category', type=int, required=True)
+    parser.add_argument('brand', type=str, required=True)
+    parser.add_argument('category', type=str, required=True)
     parser.add_argument('model', type=str, required=True)
     parser.add_argument('image', type=str)
     parser.add_argument('price', type=int, required=True)
@@ -60,8 +61,7 @@ class CarController(BaseRetrieveUpdateDestroyController):
             return {'error': 'You can\'t update others\' car.'}
 
         data = self.parser.parse_args()
-        data.pop('user_id')
-        car.update(data)
+        car.update(**data)
         return car.serialize, 200
 
     @jwt_required()
@@ -75,3 +75,14 @@ class CarController(BaseRetrieveUpdateDestroyController):
             return {'error': 'You can\'t delete others\' car.'}
 
         return super(CarController, self).delete(pk)
+
+
+class MyCarsController(Resource):
+    """Controller for getting cars created by authenticated user."""
+
+    @jwt_required()
+    def get(self):
+        username = get_jwt_identity()
+        user = UserService.get_by_username(username)
+        cars = Car.query.filter_by(user_id=user.id)
+        return [car.serialize for car in cars], 200
